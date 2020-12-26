@@ -9,4 +9,7 @@ Early days... just playing around with this for now :-)
 [ ] Auth (for publish)
 [ ] Only allow over-write if -SNAPSHOT
 [ ] Stats?
+[ ] Deploy
+
+
 

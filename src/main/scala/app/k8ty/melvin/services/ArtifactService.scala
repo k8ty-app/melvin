@@ -6,7 +6,7 @@ import org.http4s.EntityDecoder.binFile
 import org.http4s.dsl.io._
 import org.http4s.{HttpRoutes, StaticFile}
 import pureconfig.ConfigSource
-
+import pureconfig.generic.auto._
 import java.io.File
 
 object ArtifactService {

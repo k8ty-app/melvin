@@ -9,7 +9,8 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-dsl" % http4sVersion,
   "org.http4s" %% "http4s-blaze-server" % http4sVersion,
   "org.http4s" %% "http4s-blaze-client" % http4sVersion,
+  "org.http4s" %% "http4s-twirl" % http4sVersion,
   "com.github.pureconfig" %% "pureconfig" % "0.14.0"
 )
-
+lazy val root = (project in file(".")).enablePlugins(SbtTwirl)
 publishTo := Some("Marvin" at "http://localhost:9000/artifacts")
