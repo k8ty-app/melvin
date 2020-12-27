@@ -23,7 +23,7 @@ create table workers
             primary key,
     organization organizations not null,
     friendly_name text,
-    hashed_password text,
+    hashed_password text
 );
 create index workers_organizations_index
 	on workers (organization);
