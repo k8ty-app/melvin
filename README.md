@@ -11,5 +11,8 @@ Early days... just playing around with this for now :-)
 [ ] Stats?
 [ ] Deploy
 
+## Handy Links
+https://github.com/http4s/http4s/blob/main/examples/src/main/scala/com/example/http4s/ExampleService.scala
+
 
 
