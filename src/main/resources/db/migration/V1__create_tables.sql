@@ -1,31 +1,31 @@
-create table organizations
+create table organization
 (
     org_id text not null
-        constraint organizations_pk
+        constraint organization_pk
             primary key
 );
 
-create table users
+create table account
 (
     id text not null
-        constraint users_pk
+        constraint account_pk
             primary key,
-    organizations organizations[] default '{}'::organizations[] not null,
+    organizations organization[] default '{}'::organization[] not null,
     hashed_password text
 );
-create index users_organizations_index
-	on users (organizations);
+create index account_organization_index
+	on account (organizations);
 
-create table workers
+create table worker
 (
     id bigserial not null
-        constraint workers_pk
+        constraint worker_pk
             primary key,
-    organization organizations not null,
+    organization organization not null,
     friendly_name text,
     hashed_password text
 );
-create index workers_organizations_index
-	on workers (organization);
-create index workers_friendly_name_index
-	on workers (friendly_name);
+create index worker_organization_index
+	on worker (organization);
+create index worker_friendly_name_index
+	on worker (friendly_name);
