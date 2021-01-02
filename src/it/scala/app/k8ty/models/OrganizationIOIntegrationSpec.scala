@@ -4,7 +4,7 @@ import app.k8ty.melvin.doobie.io.Organization
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
-class OrganizationIntegrationSpec extends AnyFlatSpec with should.Matchers {
+class OrganizationIOIntegrationSpec extends AnyFlatSpec with should.Matchers {
 
   val newOrgId: String = "app.k8ty.melvin"
   val newOrg: Organization = Organization(newOrgId)
