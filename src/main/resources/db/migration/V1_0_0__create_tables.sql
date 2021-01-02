@@ -18,11 +18,11 @@ create index account_organization_index
 
 create table worker
 (
-    id uuid default gen_random_uuid()
+    id text default gen_random_uuid()
         constraint worker_pk
             primary key,
-    organization text,
-    name text,
+    organization text not null,
+    name text not null,
     secret text
 );
 create index worker_organization_index

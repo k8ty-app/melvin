@@ -8,14 +8,14 @@ import doobie.quill.DoobieContext
 import io.getquill.SnakeCase
 import org.http4s.BasicCredentials
 import doobie.implicits._
-import io.getquill.{ idiom => _ }
+import io.getquill.{idiom => _}
 
 import java.util.UUID
 
 case class Worker(
     id: String,
     organization: String,
-    name: Option[String],
+    name: String,
     secret: Option[String]
 )
 
@@ -29,11 +29,49 @@ object Worker extends WorkerIO {
       query[Worker]
         .insert(
           _.organization -> lift(orgId),
-          _.name -> lift(Option(name)),
+          _.name -> lift(name),
           _.secret -> lift(Option(UUID.randomUUID().toString))
         )
         .returning(w => w)
     }
+
+    def get(id: String) = quote {
+      query[Worker]
+        .filter(_.id == lift(id))
+    }
+
+    def verify(credentials: BasicCredentials) = quote {
+      query[Worker]
+        .filter(_.id == lift(credentials.username))
+        .filter(_.secret.contains(lift(credentials.password)))
+        .nonEmpty
+    }
+
+    def rename(id: String, name: String) = quote {
+      query[Worker]
+        .filter(_.id == lift(id))
+        .update(_.name -> lift(name))
+    }
+
+    def rollSecret(id: String) = quote {
+      query[Worker]
+        .filter(_.id == lift(id))
+        .update(_.secret -> lift(Option(UUID.randomUUID().toString)))
+        .returning(w => w.secret)
+    }
+
+    def delete(id: String) = quote {
+      query[Worker]
+        .filter(_.id == lift(id))
+        .delete
+    }
+
+    def deactivate(id: String) = quote {
+      query[Worker]
+        .filter(_.id == lift(id))
+        .update(_.secret -> None)
+    }
+
   }
 
   override def createWorker(orgId: String, name: String): IO[Option[Worker]] = {
@@ -47,11 +85,27 @@ object Worker extends WorkerIO {
     }
   }
 
-  override def verifyBasicCredentials(credentials: BasicCredentials): IO[Boolean] = ???
+  override def verifyBasicCredentials(credentials: BasicCredentials): IO[Boolean] = {
+    run(Queries.verify(credentials)).transact(DoobieTransactor.xa)
+  }
 
-  override def renameWorker(id: String, name: String): IO[Long] = ???
+  override def renameWorker(id: String, name: String): IO[Long] = {
+    run(Queries.rename(id, name)).transact(DoobieTransactor.xa)
+  }
 
-  override def reRollWorkerSecret(id: String): IO[Option[String]] = ???
+  override def reRollWorkerSecret(id: String): IO[Option[String]] = {
+    run(Queries.rollSecret(id)).transact(DoobieTransactor.xa)
+  }
 
-  override def deleteWorker(id: String): IO[Long] = ???
+  override def deleteWorker(id: String): IO[Long] = {
+    run(Queries.delete(id)).transact(DoobieTransactor.xa)
+  }
+
+  override def deactivateWorker(id: String): IO[Long] =  {
+    run(Queries.deactivate(id)).transact(DoobieTransactor.xa)
+  }
+
+  override def getWorkerById(id: String): IO[Option[Worker]] = {
+    run(Queries.get(id)).transact(DoobieTransactor.xa).map(_.headOption)
+  }
 }

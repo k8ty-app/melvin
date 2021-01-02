@@ -10,4 +10,6 @@ trait WorkerIO {
   def renameWorker(id: String, name: String): IO[Long]
   def reRollWorkerSecret(id: String): IO[Option[String]]
   def deleteWorker(id: String): IO[Long]
+  def deactivateWorker(id: String): IO[Long]
+  def getWorkerById(id: String): IO[Option[Worker]]
 }
