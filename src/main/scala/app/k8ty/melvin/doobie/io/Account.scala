@@ -1,4 +1,4 @@
-package app.k8ty.melvin.models
+package app.k8ty.melvin.doobie.io
 
 import doobie.quill.DoobieContext
 import io.getquill.{SnakeCase, idiom => _}
@@ -6,7 +6,7 @@ import org.http4s.BasicCredentials
 
 case class Account(
     id: String,
-//    organizations: List[Organization],
+    organizations: List[String],
     hashedPassword: Option[String]
 )
 

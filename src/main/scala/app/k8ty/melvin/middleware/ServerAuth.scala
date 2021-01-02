@@ -1,7 +1,7 @@
 package app.k8ty.melvin.middleware
 
 import app.k8ty.melvin.doobie.DoobieTransactor
-import app.k8ty.melvin.models.Account
+import app.k8ty.melvin.doobie.io.Account
 import cats.data.{ Kleisli, OptionT }
 import cats.effect.IO
 import doobie.implicits._

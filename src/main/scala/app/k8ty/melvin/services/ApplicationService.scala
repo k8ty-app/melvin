@@ -1,7 +1,7 @@
 package app.k8ty.melvin.services
 
 import app.k8ty.melvin.middleware.ServerAuth.basicAuth
-import app.k8ty.melvin.models.Account
+import app.k8ty.melvin.doobie.io.Account
 import cats.effect.IO
 import cats.implicits.toSemigroupKOps
 import org.http4s.{ AuthedRoutes, HttpRoutes }

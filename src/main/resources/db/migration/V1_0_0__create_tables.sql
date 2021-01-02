@@ -10,7 +10,7 @@ create table account
     id text not null
         constraint account_pk
             primary key,
-    organizations organization[] default '{}'::organization[] not null,
+    organizations text[] default '{}' not null,
     hashed_password text
 );
 create index account_organization_index
@@ -18,14 +18,14 @@ create index account_organization_index
 
 create table worker
 (
-    id bigserial not null
+    id uuid default gen_random_uuid()
         constraint worker_pk
             primary key,
-    organization organization not null,
-    friendly_name text,
-    hashed_password text
+    organization text,
+    name text,
+    secret text
 );
 create index worker_organization_index
 	on worker (organization);
-create index worker_friendly_name_index
-	on worker (friendly_name);
+create index worker_name_index
+	on worker (name);

@@ -19,7 +19,14 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-quill"   % doobieVersion
 )
 
-lazy val root = (project in file(".")).enablePlugins(SbtTwirl)
+lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.2"
+lazy val root = (project in file("."))
+  .enablePlugins(SbtTwirl)
+  .configs(IntegrationTest)
+  .settings(
+    Defaults.itSettings,
+    libraryDependencies += scalatest % "it,test"
+  )
 
 enablePlugins(FlywayPlugin)
 flywayUrl := sys.env.getOrElse("PG_URL",
