@@ -9,7 +9,7 @@ import pureconfig.generic.auto._
 import java.io.ByteArrayInputStream
 import java.util.concurrent.TimeUnit
 import scala.util.Try
-
+import scala.jdk.CollectionConverters._
 object S3StorageProvider {
 
   val storageConfig: S3StorageConfig =
@@ -36,6 +36,7 @@ object S3StorageProvider {
             .builder()
             .bucket(storageConfig.bucket)
             .`object`(path)
+            .headers(Map("x-amz-acl" -> "public-read").asJava)
             .stream(new ByteArrayInputStream(data), data.length, -1)
             .build()
         )
