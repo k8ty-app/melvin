@@ -1,7 +1,7 @@
 package app.k8ty.melvin.doobie.io
 
 import doobie.quill.DoobieContext
-import io.getquill.{SnakeCase, idiom => _}
+import io.getquill.{ SnakeCase, idiom => _ }
 import org.http4s.BasicCredentials
 
 case class Account(
@@ -13,8 +13,8 @@ case class Account(
 object Account {
   val dc = new DoobieContext.Postgres(SnakeCase)
   import dc._
-  val verifyBasicCredentials: BasicCredentials => Quoted[EntityQuery[Account]] = {
-    credentials => {
+  val verifyBasicCredentials: BasicCredentials => Quoted[EntityQuery[Account]] = { credentials =>
+    {
       quote {
         query[Account]
           .filter(_.id == lift(credentials.username))

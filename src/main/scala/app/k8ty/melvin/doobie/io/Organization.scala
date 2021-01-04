@@ -15,7 +15,7 @@ object Organization extends OrganizationIO {
   import dc._
 
   object Queries {
-    def create(orgId: String)= quote {
+    def create(orgId: String) = quote {
       query[Organization]
         .insert(_.orgId -> lift(orgId))
         .returning(org => org)
@@ -30,15 +30,12 @@ object Organization extends OrganizationIO {
     }
   }
 
-  override def createOrganization(orgId: String): IO[Organization] = {
+  override def createOrganization(orgId: String): IO[Organization] =
     run(Queries.create(orgId)).transact(DoobieTransactor.xa)
-  }
 
-  override def getOrganizationById(orgId: String): IO[Option[Organization]] = {
+  override def getOrganizationById(orgId: String): IO[Option[Organization]] =
     run(Queries.getById(orgId)).transact(DoobieTransactor.xa).map(_.headOption)
-  }
 
-  override def deleteOrganization(orgId: String): IO[Long] = {
+  override def deleteOrganization(orgId: String): IO[Long] =
     run(Queries.delete(orgId)).transact(DoobieTransactor.xa)
-  }
 }

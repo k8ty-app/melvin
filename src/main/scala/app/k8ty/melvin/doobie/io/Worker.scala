@@ -8,7 +8,7 @@ import doobie.quill.DoobieContext
 import io.getquill.SnakeCase
 import org.http4s.BasicCredentials
 import doobie.implicits._
-import io.getquill.{idiom => _}
+import io.getquill.{ idiom => _ }
 
 import java.util.UUID
 
@@ -85,27 +85,21 @@ object Worker extends WorkerIO {
     }
   }
 
-  override def verifyBasicCredentials(credentials: BasicCredentials): IO[Boolean] = {
+  override def verifyBasicCredentials(credentials: BasicCredentials): IO[Boolean] =
     run(Queries.verify(credentials)).transact(DoobieTransactor.xa)
-  }
 
-  override def renameWorker(id: String, name: String): IO[Long] = {
+  override def renameWorker(id: String, name: String): IO[Long] =
     run(Queries.rename(id, name)).transact(DoobieTransactor.xa)
-  }
 
-  override def reRollWorkerSecret(id: String): IO[Option[String]] = {
+  override def reRollWorkerSecret(id: String): IO[Option[String]] =
     run(Queries.rollSecret(id)).transact(DoobieTransactor.xa)
-  }
 
-  override def deleteWorker(id: String): IO[Long] = {
+  override def deleteWorker(id: String): IO[Long] =
     run(Queries.delete(id)).transact(DoobieTransactor.xa)
-  }
 
-  override def deactivateWorker(id: String): IO[Long] =  {
+  override def deactivateWorker(id: String): IO[Long] =
     run(Queries.deactivate(id)).transact(DoobieTransactor.xa)
-  }
 
-  override def getWorkerById(id: String): IO[Option[Worker]] = {
+  override def getWorkerById(id: String): IO[Option[Worker]] =
     run(Queries.get(id)).transact(DoobieTransactor.xa).map(_.headOption)
-  }
 }

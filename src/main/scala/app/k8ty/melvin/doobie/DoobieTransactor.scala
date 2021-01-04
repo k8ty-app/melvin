@@ -1,7 +1,7 @@
 package app.k8ty.melvin.doobie
 
 import app.k8ty.melvin.config.DoobieConfig
-import cats.effect.{ContextShift, IO}
+import cats.effect.{ ContextShift, IO }
 import doobie.Transactor
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor.Aux
