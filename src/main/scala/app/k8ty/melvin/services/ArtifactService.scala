@@ -1,13 +1,13 @@
 package app.k8ty.melvin.services
 
-import app.k8ty.melvin.config.StorageConfig
-import cats.effect.{Blocker, ContextShift, IO, Timer}
-import org.http4s.EntityDecoder.binFile
+import app.k8ty.melvin.storage.S3StorageProvider
+import cats.effect.{ Blocker, ContextShift, IO, Timer }
+import org.http4s.EntityDecoder.byteArrayDecoder
 import org.http4s.dsl.io._
-import org.http4s.{HttpRoutes, StaticFile}
-import pureconfig.ConfigSource
+import org.http4s.{ HttpRoutes, StaticFile }
 import pureconfig.generic.auto._
-import java.io.File
+
+import java.net.URL
 
 object ArtifactService {
 
@@ -21,25 +21,32 @@ object ArtifactService {
     )
 
   val rootPath: String = "artifacts"
-  val storageConfig: StorageConfig =
-    ConfigSource.default.loadOrThrow[StorageConfig]
 
   val serviceRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
     case req @ GET -> rootPath /: artifact => {
-      StaticFile
-        .fromFile(
-          new File(s"${storageConfig.rootStorage}/$artifact"),
-          blocker,
-          Some(req)
-        )
-        .getOrElseF(NotFound())
+      S3StorageProvider.resource
+        .use { implicit client =>
+          S3StorageProvider.getSignedUrl(s"$rootPath$artifact")
+        }
+        .flatMap {
+          case Right(url) => {
+            StaticFile
+              .fromURL(new URL(url), blocker, Some(req))
+              .getOrElseF(NotFound())
+          }
+          case Left(err) => InternalServerError(err)
+        }
     }
     case req @ PUT -> rootPath /: artifact => {
-      val newFile = new File(s"${storageConfig.rootStorage}/$artifact")
-      newFile.getParentFile.mkdirs()
-      newFile.createNewFile()
-      req.decodeWith(binFile(newFile, blocker), strict = true) { _ =>
-        Ok("")
+      req.decodeWith(byteArrayDecoder, strict = true) { data =>
+        S3StorageProvider.resource
+          .use { implicit client =>
+            S3StorageProvider.storeObject(s"$rootPath$artifact", data)
+          }
+          .flatMap {
+            case Right(etag) => Ok(etag)
+            case Left(err)   => InternalServerError(err)
+          }
       }
     }
   }

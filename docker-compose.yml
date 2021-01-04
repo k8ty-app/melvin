@@ -7,3 +7,13 @@ services:
     - 5432:5432
     environment:
       POSTGRES_PASSWORD: password
+
+  s3:
+    image: minio/minio
+    ports:
+      - 9001:9000
+    environment:
+      MINIO_ACCESS_KEY: MELVIN4MAVEN
+      MINIO_SECRET_KEY: MELVIN4MAVEN
+    entrypoint: sh
+    command: -c "mkdir -p /data/melvin.k8ty.app && /usr/bin/minio server /data"
