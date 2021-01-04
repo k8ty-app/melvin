@@ -51,6 +51,6 @@ object ApplicationService {
       Ok("Not Implemented yet!")
     }
 
-  } <+> basicAuth(authedRoutes)
+  } //<+> basicAuth(authedRoutes)
 
 }
