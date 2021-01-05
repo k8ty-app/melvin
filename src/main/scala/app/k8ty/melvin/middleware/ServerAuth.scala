@@ -1,33 +1,22 @@
 package app.k8ty.melvin.middleware
 
-import app.k8ty.melvin.doobie.DoobieTransactor
-import app.k8ty.melvin.doobie.io.Account
-import cats.data.{ Kleisli, OptionT }
+import app.k8ty.melvin.doobie.io.Worker
 import cats.effect.IO
-import doobie.implicits._
-import io.getquill.{ idiom => _ }
 import org.http4s.dsl.io._
-import org.http4s.server.AuthMiddleware
-import org.http4s.server.middleware.authentication.BasicAuth
-import org.http4s.server.middleware.authentication.BasicAuth.BasicAuthenticator
-import org.http4s.{ AuthedRoutes, BasicCredentials, Request }
+import org.http4s.headers.Authorization
+import org.http4s.{ BasicCredentials, Request, Response }
 
 object ServerAuth {
 
-  val basicRealm: String = "Melvin"
-  val dbAuthStore: BasicAuthenticator[IO, Account] =
-    (credentials: BasicCredentials) => {
-      import Account.dc._
-      run(Account.verifyBasicCredentials(credentials))
-        .transact(DoobieTransactor.xa)
-        .map(_.headOption)
+  def workerAuthenticated(req: Request[IO])(success: => IO[Response[IO]]): IO[Response[IO]] =
+    req.headers.get(Authorization) match {
+      case Some(Authorization(BasicCredentials(username, password))) => {
+        Worker.verifyBasicCredentials(BasicCredentials(username, password)).flatMap {
+          case true  => success
+          case false => Forbidden("Verboten")
+        }
+      }
+      case _ => Forbidden("Verboten")
     }
 
-  val authUser: Kleisli[IO, Request[IO], Either[String, Account]] =
-    BasicAuth
-      .challenge(basicRealm, dbAuthStore)
-      .map(_.left.map(_ => "verboten").map(_.context))
-  val onFailure: AuthedRoutes[String, IO] = Kleisli(req => OptionT.liftF(Forbidden(req.context)))
-  val basicAuth: AuthMiddleware[IO, Account] =
-    AuthMiddleware(authUser, onFailure)
 }

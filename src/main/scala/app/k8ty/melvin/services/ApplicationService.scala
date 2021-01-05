@@ -1,27 +1,23 @@
 package app.k8ty.melvin.services
 
-import app.k8ty.melvin.middleware.ServerAuth.basicAuth
-import app.k8ty.melvin.doobie.io.Account
+import app.k8ty.melvin.middleware.ServerAuth._
 import cats.effect.IO
-import cats.implicits.toSemigroupKOps
-import org.http4s.{ AuthedRoutes, HttpRoutes }
+import org.http4s.HttpRoutes
 import org.http4s.dsl.io._
 import org.http4s.twirl._
 
 object ApplicationService {
 
-  val authedRoutes: AuthedRoutes[Account, IO] = {
-    AuthedRoutes.of {
-      case GET -> Root / "private" as user => {
-        Ok(s"Accessed as ${user.id}")
-      }
-    }
-  }
-
   val serviceRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
+
     case GET -> Root => {
       Ok(html.index())
     }
+
+    case req @ GET -> Root / "private" =>
+      workerAuthenticated(req) {
+        Ok("Authorized!")
+      }
 
     case GET -> Root / "login" => {
       Ok("Not Implemented yet!")
@@ -51,6 +47,6 @@ object ApplicationService {
       Ok("Not Implemented yet!")
     }
 
-  } //<+> basicAuth(authedRoutes)
+  }
 
 }
