@@ -30,8 +30,8 @@ jobs:
           password: ${{ secrets.GHCR }}
       - name: Build and push
         uses: docker/build-push-action@v2
-        context: ./target/docker/stage
         with:
+          context: ./target/docker/stage
           push: true
           tags: ghcr.io/k8ty-app/melvin:latest
           labels: |
