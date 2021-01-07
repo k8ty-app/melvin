@@ -6,7 +6,6 @@ import cats.data.OptionT
 import cats.effect.IO
 import doobie.quill.DoobieContext
 import io.getquill.SnakeCase
-import org.http4s.BasicCredentials
 import doobie.implicits._
 import io.getquill.{ idiom => _ }
 
@@ -40,10 +39,10 @@ object Worker extends WorkerIO {
         .filter(_.id == lift(id))
     }
 
-    def verify(credentials: BasicCredentials) = quote {
+    def verify(id: String, secret: String) = quote {
       query[Worker]
-        .filter(_.id == lift(credentials.username))
-        .filter(_.secret.contains(lift(credentials.password)))
+        .filter(_.id == lift(id))
+        .filter(_.secret.contains(lift(secret)))
         .nonEmpty
     }
 
@@ -85,8 +84,8 @@ object Worker extends WorkerIO {
     }
   }
 
-  override def verifyBasicCredentials(credentials: BasicCredentials): IO[Boolean] =
-    run(Queries.verify(credentials)).transact(DoobieTransactor.xa)
+  override def verifyBasicCredentials(id: String, secret: String): IO[Boolean] =
+    run(Queries.verify(id, secret)).transact(DoobieTransactor.xa)
 
   override def renameWorker(id: String, name: String): IO[Long] =
     run(Queries.rename(id, name)).transact(DoobieTransactor.xa)

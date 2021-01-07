@@ -8,15 +8,17 @@ import org.http4s.{ BasicCredentials, Request, Response }
 
 object ServerAuth {
 
+  val forbiddenMessage: String = "You are not authorized to access this endpoint"
+
   def workerAuthenticated(req: Request[IO])(success: => IO[Response[IO]]): IO[Response[IO]] =
     req.headers.get(Authorization) match {
       case Some(Authorization(BasicCredentials(username, password))) => {
-        Worker.verifyBasicCredentials(BasicCredentials(username, password)).flatMap {
+        Worker.verifyBasicCredentials(username, password).flatMap {
           case true  => success
-          case false => Forbidden("Verboten")
+          case false => Forbidden(forbiddenMessage)
         }
       }
-      case _ => Forbidden("Verboten")
+      case _ => Forbidden(forbiddenMessage)
     }
 
 }
