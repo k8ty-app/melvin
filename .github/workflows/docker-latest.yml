@@ -13,12 +13,13 @@ jobs:
       - uses: actions/setup-java@v1
         name: JavaJavaJava
         with:
-          java-version: '15.0.1+9'
+          java-version: '15'
           java-package: jdk
           architecture: x64
-        run: |
+      - run: |
           curl -Ls https://git.io/sbt > sbtx && chmod 0755 sbtx
           ./sbtx docker:stage
+        name: Compile + Docker Stage
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
       - name: Login to GitHub Container Registry
