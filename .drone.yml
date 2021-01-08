@@ -3,6 +3,10 @@ kind: pipeline
 type: kubernetes
 name: db_migrations
 
+trigger:
+  branch:
+    - main
+
 steps:
   - name: flyway_migrations
     image: adoptopenjdk/openjdk15-openj9:debian-slim
