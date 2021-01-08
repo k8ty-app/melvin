@@ -1,0 +1,11 @@
+pipeline:
+  build:
+    image: adoptopenjdk/openjdk15-openj9:debian-slim
+    commands:
+      - curl -Ls https://git.io/sbt > sbtx && chmod 0755 sbtx
+      - ./sbtx flywayMigrate
+    environment:
+      - PG_URL=$PG_URL
+      - PG_USER=$PG_USER
+      - PG_PASS=$PG_PASS
+    secrets: [PG_URL, PG_USER, PG_PASS]
