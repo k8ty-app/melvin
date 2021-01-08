@@ -13,4 +13,4 @@ steps:
       - PG_URL=$PG_URL
       - PG_USER=$PG_USER
       - PG_PASS=$PG_PASS
-      secrets: [PG_URL, PG_USER, PG_PASS]
+    secrets: [PG_URL, PG_USER, PG_PASS]
