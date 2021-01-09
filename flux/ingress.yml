@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: k8ty-melvin
+  namespace: k8ty-melvin
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+    - hosts:
+        - melvin.k8ty.app
+      secretName: k8ty-melvin-tls
+  rules:
+    - host: melvin.k8ty.app
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: k8ty-melvin
+              servicePort: 9000

@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8ty-melvin
+  namespace: k8ty-melvin
+  labels:
+    app: k8ty-melvin
+  annotations:
+    fluxcd.io/automated: "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8ty-melvin
+  template:
+    metadata:
+      labels:
+        app: k8ty-melvin
+    spec:
+      containers:
+        - name: k8ty-melvin
+          image: ghcr.io/k8ty-app/k8ty-melvin:latest
+          imagePullPolicy: Always
+          stdin: true
+          tty: true
+          ports:
+            - name: http
+              containerPort: 9000
+          env:
+            - name: S3_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: k8ty-melvin
+                  key: S3_ENDPOINT
+            - name: S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: k8ty-melvin
+                  key: S3_ACCESS_KEY
+            - name: S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: k8ty-melvin
+                  key: S3_SECRET_KEY
+            - name: PG_URL
+              valueFrom:
+                secretKeyRef:
+                  name: k8ty-melvin
+                  key: PG_URL
+            - name: PG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: k8ty-melvin
+                  key: PG_USER
+            - name: PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: k8ty-melvin
+                  key: PG_PASS
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: 9000
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: 9000
+          resources: { }
+---
