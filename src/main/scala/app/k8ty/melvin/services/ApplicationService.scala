@@ -47,6 +47,9 @@ object ApplicationService {
       Ok("Not Implemented yet!")
     }
 
+    case GET -> Root / "_health" => {
+      Ok()
+    }
   }
 
 }
