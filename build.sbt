@@ -33,4 +33,4 @@ flywayPassword := sys.env.getOrElse("PG_PASS", "password")
 flywayLocations += "db/migration"
 
 dockerExposedPorts ++= Seq(9000)
-dockerBaseImage := "adoptopenjdk/openjdk15-openj9"
+dockerBaseImage := "adoptopenjdk/openjdk15"
