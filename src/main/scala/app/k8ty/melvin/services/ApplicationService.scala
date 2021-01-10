@@ -48,7 +48,7 @@ object ApplicationService {
     }
 
     case GET -> Root / "_health" => {
-      Ok()
+      Ok("")
     }
   }
 
