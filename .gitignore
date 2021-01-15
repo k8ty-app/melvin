@@ -4,3 +4,7 @@ target
 .env
 .swap
 *.secret.yml
+.metals
+.vscode
+metals.sbt
+.bloop
