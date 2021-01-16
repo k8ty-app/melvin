@@ -1,3 +1,5 @@
+resolvers += "Melvin" at "https://melvin.k8ty.app/artifacts"
+
 lazy val http4sVersion = "0.21.13"
 lazy val doobieVersion = "0.9.0"
 lazy val scalatest = "org.scalatest" %% "scalatest" % "3.2.2"
@@ -22,7 +24,8 @@ lazy val root = (project in file("."))
       "org.tpolecat" %% "doobie-postgres" % doobieVersion,
       "org.tpolecat" %% "doobie-specs2" % doobieVersion,
       "org.tpolecat" %% "doobie-quill" % doobieVersion,
-      "io.minio" % "minio" % "8.0.3"
+      "io.minio" % "minio" % "8.0.3",
+      "app.k8ty" %% "crypto" % "0.0.1-SNAPSHOT"
     )
   )
 
