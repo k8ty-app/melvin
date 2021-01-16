@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    name: k8ty-melvin
-  name: k8ty-melvin
