@@ -1,5 +1,6 @@
 package app.k8ty.melvin.doobie.io
 
+import app.k8ty.crypto.Crypto
 import app.k8ty.melvin.doobie.DoobieTransactor
 import app.k8ty.melvin.doobie.actions.WorkerIO
 import cats.data.OptionT
@@ -8,8 +9,6 @@ import doobie.quill.DoobieContext
 import io.getquill.SnakeCase
 import doobie.implicits._
 import io.getquill.{ idiom => _ }
-
-import java.util.UUID
 
 case class Worker(
     id: String,
@@ -27,9 +26,10 @@ object Worker extends WorkerIO {
     def create(orgId: String, name: String) = quote {
       query[Worker]
         .insert(
+          _.id -> lift(Crypto.generatePublicKey),
           _.organization -> lift(orgId),
           _.name -> lift(name),
-          _.secret -> lift(Option(UUID.randomUUID().toString))
+          _.secret -> lift(Option(Crypto.generatePrivateKey))
         )
         .returning(w => w)
     }
@@ -55,7 +55,7 @@ object Worker extends WorkerIO {
     def rollSecret(id: String) = quote {
       query[Worker]
         .filter(_.id == lift(id))
-        .update(_.secret -> lift(Option(UUID.randomUUID().toString)))
+        .update(_.secret -> lift(Option(Crypto.generatePrivateKey)))
         .returning(w => w.secret)
     }
 

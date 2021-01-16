@@ -1,8 +1,12 @@
 package app.k8ty.melvin.doobie.io
 
+import app.k8ty.crypto.Crypto
+import app.k8ty.melvin.doobie.DoobieTransactor
+import app.k8ty.melvin.doobie.actions.AccountIO
+import cats.effect.IO
 import doobie.quill.DoobieContext
 import io.getquill.{ SnakeCase, idiom => _ }
-import org.http4s.BasicCredentials
+import doobie.implicits._
 
 case class Account(
     id: String,
@@ -10,18 +14,79 @@ case class Account(
     hashedPassword: Option[String]
 )
 
-object Account {
+object Account extends AccountIO {
   val dc = new DoobieContext.Postgres(SnakeCase)
   import dc._
-  val verifyBasicCredentials: BasicCredentials => Quoted[EntityQuery[Account]] = { credentials =>
-    {
-      quote {
-        query[Account]
-          .filter(_.id == lift(credentials.username))
-          .filter(
-            _.hashedPassword.contains(lift(credentials.password))
-          ) // TODO hash, not plain
-      }
+
+  object Queries {
+
+    def register(id: String, password: Option[String], organization: Option[String]) = quote {
+      query[Account]
+        .insert(
+          _.id -> lift(id),
+          _.hashedPassword -> lift(password.map(p => Crypto.pbkdf2Hash(p))),
+          _.organizations -> lift(organization.toList)
+        )
+        .returning(w => w)
     }
+
+    def getById(id: String) = quote {
+      query[Account].filter(_.id == lift(id))
+    }
+
+    def addOrganization(id: String, organization: String) = ???
+
+    def removeOrganization(id: String, organization: String) = ???
+
+    def removeAllOrganizations(id: String) = quote {
+      query[Account]
+        .filter(_.id == lift(id))
+        .update(_.organizations -> lift(List.empty[String]))
+    }
+
+    def updatePassword(id: String, oldPassword: String, newPassword: String) = ???
+
+    def resetPassword(id: String, newPassword: String) = quote {
+      query[Account]
+        .filter(_.id == lift(id))
+        .update(_.hashedPassword -> lift(Option(Crypto.pbkdf2Hash(newPassword))))
+    }
+
+    def deactivate(id: String) = quote {
+      query[Account]
+        .filter(_.id == lift(id))
+        .update(_.hashedPassword -> None)
+    }
+
+    def delete(id: String) = quote {
+      query[Account]
+        .filter(_.id == lift(id))
+        .delete
+    }
+
   }
+
+  override def registerAccount(id: String, password: Option[String], organization: Option[String]): IO[Account] =
+    run(Queries.register(id, password, organization)).transact(DoobieTransactor.xa)
+
+  override def getAccountById(id: String): IO[Option[Account]] =
+    run(Queries.getById(id)).transact(DoobieTransactor.xa).map(_.headOption)
+
+  override def addOrganizationToAccount(id: String, orgId: String): IO[Long] = ???
+
+  override def removeOrganizationFromAccount(id: String, orgId: String): IO[Long] = ???
+
+  override def removeAllOrganizationFromAccount(id: String): IO[Long] =
+    run(Queries.removeAllOrganizations(id)).transact(DoobieTransactor.xa)
+
+  override def updateAccountPassword(id: String, oldPassword: String, newPassword: String): IO[Long] = ???
+
+  override def resetAccountPassword(id: String, password: String): IO[Long] =
+    run(Queries.resetPassword(id, password)).transact(DoobieTransactor.xa)
+
+  override def deactivateAccount(id: String): IO[Long] =
+    run(Queries.deactivate(id)).transact(DoobieTransactor.xa)
+
+  override def deleteAccount(id: String): IO[Long] =
+    run(Queries.delete(id)).transact(DoobieTransactor.xa)
 }
