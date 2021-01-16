@@ -15,6 +15,7 @@ object Organization extends OrganizationIO {
   import dc._
 
   object Queries {
+
     def create(orgId: String) = quote {
       query[Organization]
         .insert(_.orgId -> lift(orgId))

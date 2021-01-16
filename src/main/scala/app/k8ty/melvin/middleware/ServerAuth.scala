@@ -18,6 +18,8 @@ object ServerAuth {
           case false => Forbidden(forbiddenMessage)
         }
       }
-      case _ => Unauthorized(Challenge(scheme = "Basic", realm = "Melvin"))
+      case _                                                         => {
+        Unauthorized(Challenge(scheme = "Basic", realm = "Melvin"))
+      }
     }
 }

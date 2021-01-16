@@ -9,9 +9,9 @@ import io.getquill.{ SnakeCase, idiom => _ }
 import doobie.implicits._
 
 case class Account(
-    id: String,
-    organizations: List[String],
-    hashedPassword: Option[String]
+  id: String,
+  organizations: List[String],
+  hashedPassword: Option[String]
 )
 
 object Account extends AccountIO {
@@ -23,9 +23,9 @@ object Account extends AccountIO {
     def register(id: String, password: Option[String], organization: Option[String]) = quote {
       query[Account]
         .insert(
-          _.id -> lift(id),
+          _.id             -> lift(id),
           _.hashedPassword -> lift(password.map(p => Crypto.pbkdf2Hash(p))),
-          _.organizations -> lift(organization.toList)
+          _.organizations  -> lift(organization.toList)
         )
         .returning(w => w)
     }

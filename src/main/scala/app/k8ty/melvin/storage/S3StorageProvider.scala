@@ -10,6 +10,7 @@ import java.io.ByteArrayInputStream
 import java.util.concurrent.TimeUnit
 import scala.util.Try
 import scala.jdk.CollectionConverters._
+
 object S3StorageProvider {
 
   val storageConfig: S3StorageConfig =

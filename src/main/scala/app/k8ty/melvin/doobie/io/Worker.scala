@@ -11,10 +11,10 @@ import doobie.implicits._
 import io.getquill.{ idiom => _ }
 
 case class Worker(
-    id: String,
-    organization: String,
-    name: String,
-    secret: Option[String]
+  id: String,
+  organization: String,
+  name: String,
+  secret: Option[String]
 )
 
 object Worker extends WorkerIO {
@@ -26,10 +26,10 @@ object Worker extends WorkerIO {
     def create(orgId: String, name: String) = quote {
       query[Worker]
         .insert(
-          _.id -> lift(Crypto.generatePublicKey),
+          _.id           -> lift(Crypto.generatePublicKey),
           _.organization -> lift(orgId),
-          _.name -> lift(name),
-          _.secret -> lift(Option(Crypto.generatePrivateKey))
+          _.name         -> lift(name),
+          _.secret       -> lift(Option(Crypto.generatePrivateKey))
         )
         .returning(w => w)
     }
@@ -75,12 +75,12 @@ object Worker extends WorkerIO {
 
   override def createWorker(orgId: String, name: String): IO[Option[Worker]] = {
     val orgOptIO: IO[Option[Organization]] = Organization.getOrganizationById(orgId)
-    val createIO: IO[Worker] = run(Queries.create(orgId, name)).transact(DoobieTransactor.xa)
+    val createIO: IO[Worker]               = run(Queries.create(orgId, name)).transact(DoobieTransactor.xa)
     orgOptIO.flatMap {
       case Some(_) => {
         OptionT.liftF(createIO).value
       }
-      case None => IO(None)
+      case None    => IO(None)
     }
   }
 

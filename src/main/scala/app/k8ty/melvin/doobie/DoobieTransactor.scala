@@ -15,6 +15,7 @@ object DoobieTransactor {
 
   implicit val cs: ContextShift[IO] =
     IO.contextShift(ExecutionContexts.synchronous)
+
   val xa: Aux[IO, Unit] = Transactor.fromDriverManager[IO](
     doobieConfig.pgDriver,
     doobieConfig.pgUrl,
