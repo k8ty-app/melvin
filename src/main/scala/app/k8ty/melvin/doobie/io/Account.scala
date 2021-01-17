@@ -60,9 +60,14 @@ object Account extends AccountIO {
         .update(_.organizations -> lift(List.empty[String]))
     }
 
-    def updatePassword(id: String, oldPassword: String, newPassword: String) = ???
+    def getHashedPassword(id: String) = quote {
+      query[Account]
+        .filter(_.id == lift(id))
+        .take(1)
+        .map(_.hashedPassword)
+    }
 
-    def resetPassword(id: String, newPassword: String) = quote {
+    def updatePassword(id: String, newPassword: String) = quote {
       query[Account]
         .filter(_.id == lift(id))
         .update(_.hashedPassword -> lift(Option(Crypto.pbkdf2Hash(newPassword))))
@@ -97,14 +102,24 @@ object Account extends AccountIO {
   override def removeAllOrganizationFromAccount(id: String): IO[Long] =
     run(Queries.removeAllOrganizations(id)).transact(DoobieTransactor.xa)
 
-  override def updateAccountPassword(id: String, oldPassword: String, newPassword: String): IO[Long] = ???
+  override def updateAccountPassword(id: String, oldPassword: String, newPassword: String): IO[Long] = {
+    validatePassword(id, oldPassword).flatMap {
+      case true  => run(Queries.updatePassword(id, newPassword)).transact(DoobieTransactor.xa)
+      case false => IO.pure(0L)
+    }
+  }
 
   override def resetAccountPassword(id: String, password: String): IO[Long] =
-    run(Queries.resetPassword(id, password)).transact(DoobieTransactor.xa)
+    run(Queries.updatePassword(id, password)).transact(DoobieTransactor.xa)
 
   override def deactivateAccount(id: String): IO[Long] =
     run(Queries.deactivate(id)).transact(DoobieTransactor.xa)
 
   override def deleteAccount(id: String): IO[Long] =
     run(Queries.delete(id)).transact(DoobieTransactor.xa)
+
+  override def validatePassword(id: String, password: String): IO[Boolean] =
+    run(Queries.getHashedPassword(id))
+      .transact(DoobieTransactor.xa)
+      .map(_.headOption.flatten.exists(h => Crypto.validatePbkdf2Hash(password, h)))
 }

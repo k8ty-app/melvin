@@ -9,6 +9,7 @@ trait AccountIO {
   def addOrganizationToAccount(id: String, orgId: String): IO[Long]
   def removeOrganizationFromAccount(id: String, orgId: String): IO[Long]
   def removeAllOrganizationFromAccount(id: String): IO[Long]
+  def validatePassword(id: String, password: String): IO[Boolean]
   def updateAccountPassword(id: String, oldPassword: String, newPassword: String): IO[Long]
   def resetAccountPassword(id: String, password: String): IO[Long]
   def deactivateAccount(id: String): IO[Long]
