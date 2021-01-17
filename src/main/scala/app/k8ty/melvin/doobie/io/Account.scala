@@ -10,7 +10,7 @@ import doobie.implicits._
 
 case class Account(
   id: String,
-  organizations: List[String],
+  organizations: Seq[String],
   hashedPassword: Option[String]
 )
 
@@ -34,9 +34,25 @@ object Account extends AccountIO {
       query[Account].filter(_.id == lift(id))
     }
 
-    def addOrganization(id: String, organization: String) = ???
+    val addStringElement = quote { (arr: Seq[String], elem: String) =>
+      infix"array_append ( $arr, $elem )".as[Seq[String]]
+    }
 
-    def removeOrganization(id: String, organization: String) = ???
+    def addOrganization(id: String, organization: String) = quote {
+      query[Account]
+        .filter(_.id == lift(id))
+        .update(acc => acc.organizations -> addStringElement(acc.organizations, lift(organization)))
+    }
+
+    val removeStringElement = quote { (arr: Seq[String], elem: String) =>
+      infix"array_remove ( $arr, $elem )".as[Seq[String]]
+    }
+
+    def removeOrganization(id: String, organization: String) = quote {
+      query[Account]
+        .filter(_.id == lift(id))
+        .update(acc => acc.organizations -> removeStringElement(acc.organizations, lift(organization)))
+    }
 
     def removeAllOrganizations(id: String) = quote {
       query[Account]
@@ -72,9 +88,11 @@ object Account extends AccountIO {
   override def getAccountById(id: String): IO[Option[Account]] =
     run(Queries.getById(id)).transact(DoobieTransactor.xa).map(_.headOption)
 
-  override def addOrganizationToAccount(id: String, orgId: String): IO[Long] = ???
+  override def addOrganizationToAccount(id: String, orgId: String): IO[Long] =
+    run(Queries.addOrganization(id, orgId)).transact(DoobieTransactor.xa)
 
-  override def removeOrganizationFromAccount(id: String, orgId: String): IO[Long] = ???
+  override def removeOrganizationFromAccount(id: String, orgId: String): IO[Long] =
+    run(Queries.removeOrganization(id, orgId)).transact(DoobieTransactor.xa)
 
   override def removeAllOrganizationFromAccount(id: String): IO[Long] =
     run(Queries.removeAllOrganizations(id)).transact(DoobieTransactor.xa)
