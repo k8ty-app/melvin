@@ -18,8 +18,8 @@ steps:
     image: adoptopenjdk/openjdk15-openj9:debian-slim
     commands:
       - curl -Ls https://git.io/sbt > sbtx && chmod 0755 sbtx
-      - ./sbtx flywayMigrate
-      - ./sbtx it:test
+      - ./sbtx -ivy .ivy flywayMigrate
+      - ./sbtx -ivy .ivy it:test
     environment:
       PG_URL: "jdbc:postgresql://postgres:5432/postgres"
       PG_USER: postgres
@@ -28,7 +28,7 @@ steps:
   - name: flyway_migrations
     image: adoptopenjdk/openjdk15-openj9:debian-slim
     commands:
-      - ./sbtx flywayMigrate
+      - ./sbtx -ivy .ivy flywayMigrate
     environment:
       PG_URL:
         from_secret: PG_URL
