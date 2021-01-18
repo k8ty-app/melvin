@@ -1,17 +1,33 @@
 ---
 kind: pipeline
 type: kubernetes
-name: db_migrations
+name: melvin@main
 
 trigger:
   branch:
     - main
 
+services:
+  - name: postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: password
+
 steps:
-  - name: flyway_migrations
+  - name: integration_tests
     image: adoptopenjdk/openjdk15-openj9:debian-slim
     commands:
       - curl -Ls https://git.io/sbt > sbtx && chmod 0755 sbtx
+      - ./sbtx flywayMigrate
+      - ./sbtx it:test
+    environment:
+      PG_URL: "jdbc:postgresql://postgres:5432/postgres"
+      PG_USER: postgres
+      PG_PASSWORD: password
+
+  - name: flyway_migrations
+    image: adoptopenjdk/openjdk15-openj9:debian-slim
+    commands:
       - ./sbtx flywayMigrate
     environment:
       PG_URL:
