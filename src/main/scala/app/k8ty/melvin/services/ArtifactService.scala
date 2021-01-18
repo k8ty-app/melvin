@@ -23,13 +23,11 @@ object ArtifactService {
       scala.concurrent.ExecutionContext.Implicits.global
     )
 
-  val rootPath: String = "artifacts"
-
   val serviceRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-    case req @ GET -> rootPath /: artifact => {
+    case req @ GET -> "artifacts" /: artifact => {
       S3StorageProvider.resource
         .use { implicit client =>
-          S3StorageProvider.getSignedUrl(s"$rootPath$artifact")
+          S3StorageProvider.getSignedUrl(s"artifacts/$artifact")
         }
         .flatMap {
           case Right(url) => {
@@ -40,12 +38,12 @@ object ArtifactService {
           case Left(err)  => InternalServerError(err)
         }
     }
-    case req @ PUT -> rootPath /: artifact =>
+    case req @ PUT -> "artifacts" /: artifact =>
       workerAuthenticated(req) {
         req.decodeWith(byteArrayDecoder, strict = true) { data =>
           S3StorageProvider.resource
             .use { implicit client =>
-              S3StorageProvider.storeObject(s"$rootPath$artifact", data)
+              S3StorageProvider.storeObject(s"artifacts/$artifact", data)
             }
             .flatMap {
               case Right(etag) => Ok(etag)
