@@ -27,7 +27,7 @@ object Account extends AccountIO {
           _.hashedPassword -> lift(password.map(p => Crypto.pbkdf2Hash(p))),
           _.organizations  -> lift(organization.toList)
         )
-        .returning(w => w)
+        .returning(a => a)
     }
 
     def getById(id: String) = quote {
@@ -35,7 +35,7 @@ object Account extends AccountIO {
     }
 
     val addStringElement = quote { (arr: Seq[String], elem: String) =>
-      infix"array_append ( $arr, $elem )".as[Seq[String]]
+      infix"array_append ( $arr, $elem::text )".as[Seq[String]]
     }
 
     def addOrganization(id: String, organization: String) = quote {
@@ -45,7 +45,7 @@ object Account extends AccountIO {
     }
 
     val removeStringElement = quote { (arr: Seq[String], elem: String) =>
-      infix"array_remove ( $arr, $elem )".as[Seq[String]]
+      infix"array_remove ( $arr, $elem::text )".as[Seq[String]]
     }
 
     def removeOrganization(id: String, organization: String) = quote {
@@ -87,14 +87,25 @@ object Account extends AccountIO {
 
   }
 
-  override def registerAccount(id: String, password: Option[String], organization: Option[String]): IO[Account] =
-    run(Queries.register(id, password, organization)).transact(DoobieTransactor.xa)
+  override def registerAccount(id: String, password: Option[String], organization: Option[String]): IO[Option[Account]] = {
+    organization match {
+      case Some(orgId) => {
+        Organization.getOrganizationById(orgId).flatMap { org =>
+          run(Queries.register(id, password, org.map(_.orgId))).transact(DoobieTransactor.xa).option
+        }
+      }
+      case None => run(Queries.register(id, password, organization)).transact(DoobieTransactor.xa).option
+    }
+  }
 
   override def getAccountById(id: String): IO[Option[Account]] =
     run(Queries.getById(id)).transact(DoobieTransactor.xa).map(_.headOption)
 
   override def addOrganizationToAccount(id: String, orgId: String): IO[Long] =
-    run(Queries.addOrganization(id, orgId)).transact(DoobieTransactor.xa)
+    Organization.getOrganizationById(orgId).flatMap {
+      case Some(org) => run(Queries.addOrganization(id, org.orgId)).transact(DoobieTransactor.xa)
+      case None => IO.pure(0L)
+    }
 
   override def removeOrganizationFromAccount(id: String, orgId: String): IO[Long] =
     run(Queries.removeOrganization(id, orgId)).transact(DoobieTransactor.xa)

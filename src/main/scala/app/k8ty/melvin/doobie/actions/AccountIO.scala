@@ -4,7 +4,7 @@ import app.k8ty.melvin.doobie.io.Account
 import cats.effect.IO
 
 trait AccountIO {
-  def registerAccount(id: String, password: Option[String] = None, organization: Option[String] = None): IO[Account]
+  def registerAccount(id: String, password: Option[String] = None, organization: Option[String] = None): IO[Option[Account]]
   def getAccountById(id: String): IO[Option[Account]]
   def addOrganizationToAccount(id: String, orgId: String): IO[Long]
   def removeOrganizationFromAccount(id: String, orgId: String): IO[Long]
