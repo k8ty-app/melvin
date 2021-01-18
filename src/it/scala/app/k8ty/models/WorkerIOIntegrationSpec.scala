@@ -9,8 +9,8 @@ import org.scalatest.matchers.should
 
 class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with BeforeAndAfter {
 
-  val orgId: String = "app.worker"
-  val badOrg: String = "d.n.e"
+  val orgId: String        = "app.worker"
+  val badOrg: String       = "d.n.e"
   val originalName: String = "ogName"
 
   // Not in a before, due to our lazy vals
@@ -43,7 +43,7 @@ class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with Befo
     )
   }
 
-  lazy val workerId: String = originalWorker.map(_.id).getOrElse(throw new Exception("No Worker ID!"))
+  lazy val workerId: String       = originalWorker.map(_.id).getOrElse(throw new Exception("No Worker ID!"))
   lazy val originalSecret: String = originalWorker.flatMap(_.secret).getOrElse(throw new Exception("No Worker Secret"))
 
   it should "be able to get a Worker by ID" in {
@@ -53,48 +53,31 @@ class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with Befo
   }
 
   it should "properly verify Correct BasicCredentials" in {
-    // Make sure our creds work
-    val goodCreds = BasicCredentials(
-      workerId,
-      originalSecret
-    )
     assert(
-      Worker.verifyBasicCredentials(goodCreds).unsafeRunSync()
+      Worker.verifyBasicCredentials(workerId, originalSecret).unsafeRunSync()
     )
   }
 
   it should "properly verify Bad User BasicCredentials" in {
-    val badUserCreds = BasicCredentials(
-      "No Good",
-      originalSecret
-    )
     assert(
-      !Worker.verifyBasicCredentials(badUserCreds).unsafeRunSync()
+      !Worker.verifyBasicCredentials("No Good", originalSecret).unsafeRunSync()
     )
   }
 
   it should "properly verify Bad Password BasicCredentials" in {
-    val badPassCreds = BasicCredentials(
-      workerId,
-      "No Good"
-    )
     assert(
-      !Worker.verifyBasicCredentials(badPassCreds).unsafeRunSync()
+      !Worker.verifyBasicCredentials(workerId, "No Good").unsafeRunSync()
     )
   }
 
   it should "properly verify Bad User + Pass BasicCredentials" in {
-    val reallyBadCreds = BasicCredentials(
-      "No good",
-      "No Good"
-    )
     assert(
-      !Worker.verifyBasicCredentials(reallyBadCreds).unsafeRunSync()
+      !Worker.verifyBasicCredentials("No good", "No Good").unsafeRunSync()
     )
   }
 
   lazy val newWorkerSecret: Option[String] = Worker.reRollWorkerSecret(workerId).unsafeRunSync()
-  lazy val nwSecret: String = newWorkerSecret.getOrElse(throw new Exception("No updated Worker Secret"))
+  lazy val nwSecret: String                = newWorkerSecret.getOrElse(throw new Exception("No updated Worker Secret"))
 
   it should "be able to re-roll a Worker secret" in {
     assert(newWorkerSecret.nonEmpty)
@@ -102,16 +85,11 @@ class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with Befo
   }
 
   it should "properly verify our updated BasicCredentials" in {
-    val oldCreds = BasicCredentials(workerId, originalSecret)
     assert(
-      !Worker.verifyBasicCredentials(oldCreds).unsafeRunSync()
-    )
-    val newCreds = BasicCredentials(
-      workerId,
-      nwSecret
+      !Worker.verifyBasicCredentials(workerId, originalSecret).unsafeRunSync()
     )
     assert(
-      Worker.verifyBasicCredentials(newCreds).unsafeRunSync()
+      Worker.verifyBasicCredentials(workerId, nwSecret).unsafeRunSync()
     )
   }
 
@@ -125,12 +103,8 @@ class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with Befo
     assert(
       Worker.deactivateWorker(workerId).unsafeRunSync() == 1
     )
-    val newCreds = BasicCredentials(
-      workerId,
-      nwSecret
-    )
     assert(
-      !Worker.verifyBasicCredentials(newCreds).unsafeRunSync()
+      !Worker.verifyBasicCredentials(workerId, nwSecret).unsafeRunSync()
     )
   }
 
