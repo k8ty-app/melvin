@@ -53,7 +53,9 @@ steps:
       dockerfile: ./target/docker/stage/Dockerfile
       context: ./target/docker/stage
       repo: ghcr.io/k8ty-app/melvin
-      tags: latest
+      tags:
+        - latest
+        - $DRONE_COMMIT_SHA
       extra-lables: |
         org.opencontainers.image.source=$DRONE_REPO_LINK
         org.opencontainers.image.revision=$DRONE_COMMIT_SHA
