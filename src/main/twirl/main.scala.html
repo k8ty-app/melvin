@@ -1,13 +1,54 @@
 @(title: String)(content: Html)
-<!doctype html>
-
-<html lang="en">
+<!DOCTYPE html>
+<html>
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>@title</title>
+        <link rel="stylesheet" href="/assets/css/bulma.min.css">
     </head>
-
     <body>
-        @content
+        <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="/">
+                    Melvin
+                </a>
+
+                <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="basic-navbar">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+
+            <div id="basic-navbar" class="navbar-menu">
+                <div class="navbar-start">
+                    <a class="navbar-item">
+                        Artifacts
+                    </a>
+                    <a class="navbar-item" href="https://k8ty.app/docs/ka/melvin">
+                        Documentation
+                    </a>
+                </div>
+
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a class="button is-primary">
+                                <strong>Sign up</strong>
+                            </a>
+                            <a class="button is-light">
+                                Log in
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <section class="section">
+            <div class="container">
+            @content
+            </div>
+        </section>
     </body>
 </html>
