@@ -18,8 +18,8 @@ steps:
     image: adoptopenjdk/openjdk15-openj9:debian-slim
     commands:
       - curl -Ls https://git.io/sbt > sbtx && chmod 0755 sbtx
-      - ./sbtx -ivy .ivy flywayMigrate
-      - ./sbtx -ivy .ivy it:test
+      - ./sbtx flywayMigrate
+      - ./sbtx it:test
     environment:
       PG_URL: "jdbc:postgresql://postgres:5432/postgres"
       PG_USER: postgres
@@ -36,3 +36,27 @@ steps:
         from_secret: PG_USER
       PG_PASS:
         from_secret: PG_PASS
+
+  - name: docker_stage
+    image: adoptopenjdk/openjdk15-openj9:debian-slim
+    commands:
+      - ./sbtx docker:stage
+
+  - name: docker_push_latest
+    image: plugins/docker
+    environment:
+      GHCR_USER:
+        from_secret: GHCR_USER
+      GHCR_PASS:
+        from_secret: GHCR_PASS
+    settings:
+      registry: ghcr.io
+      username: $GHCR_USER
+      password: $GHCR_PASS
+      dockerfile: ./target/docker/stage/Dockerfile
+      context: ./target/docker/stage
+      repo: ghcr.io/k8ty-app/melvin
+      tags: latest
+      extra-lables: |
+        org.opencontainers.image.source=$DRONE_REPO_LINK
+        org.opencontainers.image.revision=$DRONE_COMMIT_SHA
