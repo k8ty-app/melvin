@@ -44,15 +44,12 @@ steps:
 
   - name: docker_push_latest
     image: plugins/docker
-    environment:
-      GHCR_USER:
-        from_secret: GHCR_USER
-      GHCR_PASS:
-        from_secret: GHCR_PASS
     settings:
       registry: ghcr.io
-      username: $GHCR_USER
-      password: $GHCR_PASS
+      username:
+        from_secret: GHCR_USER
+      password:
+        from_secret: GHCR_PASS
       dockerfile: ./target/docker/stage/Dockerfile
       context: ./target/docker/stage
       repo: ghcr.io/k8ty-app/melvin
