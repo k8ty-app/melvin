@@ -5,7 +5,7 @@ import cats.effect.IO
 
 trait WorkerIO {
   def createWorker(orgId: String, name: String): IO[Option[Worker]]
-  def verifyBasicCredentials(id: String, secret: String): IO[Boolean]
+  def verifyBasicCredentials(id: String, secret: String): IO[Option[Worker]]
   def renameWorker(id: String, name: String): IO[Long]
   def reRollWorkerSecret(id: String): IO[Option[String]]
   def deleteWorker(id: String): IO[Long]

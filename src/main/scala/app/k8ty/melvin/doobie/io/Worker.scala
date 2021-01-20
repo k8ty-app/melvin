@@ -43,7 +43,6 @@ object Worker extends WorkerIO {
       query[Worker]
         .filter(_.id == lift(id))
         .filter(_.secret.contains(lift(secret)))
-        .nonEmpty
     }
 
     def rename(id: String, name: String) = quote {
@@ -84,8 +83,8 @@ object Worker extends WorkerIO {
     }
   }
 
-  override def verifyBasicCredentials(id: String, secret: String): IO[Boolean] =
-    run(Queries.verify(id, secret)).transact(DoobieTransactor.xa)
+  override def verifyBasicCredentials(id: String, secret: String): IO[Option[Worker]] =
+    run(Queries.verify(id, secret)).transact(DoobieTransactor.xa).map(_.headOption)
 
   override def renameWorker(id: String, name: String): IO[Long] =
     run(Queries.rename(id, name)).transact(DoobieTransactor.xa)
