@@ -10,12 +10,12 @@ object ServerAuth {
 
   private val forbiddenMessage: String = "You are not authorized to reach this endpoint."
 
-  def workerAuthenticated(req: Request[IO])(success: => IO[Response[IO]]): IO[Response[IO]] =
+  def workerAuthenticated(req: Request[IO])(success: Worker => IO[Response[IO]]): IO[Response[IO]] =
     req.headers.get(Authorization) match {
       case Some(Authorization(BasicCredentials(username, password))) => {
         Worker.verifyBasicCredentials(username, password).flatMap {
-          case true  => success
-          case false => Forbidden(forbiddenMessage)
+          case Some(worker)  => success(worker)
+          case None => Forbidden(forbiddenMessage)
         }
       }
       case _                                                         => {

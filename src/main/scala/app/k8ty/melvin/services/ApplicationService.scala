@@ -15,8 +15,8 @@ object ApplicationService {
     }
 
     case req @ GET -> Root / "private" =>
-      workerAuthenticated(req) {
-        Ok("Authorized!")
+      workerAuthenticated(req) { _ =>
+        Ok(s"Authorized!")
       }
 
     case GET -> Root / "login" => {

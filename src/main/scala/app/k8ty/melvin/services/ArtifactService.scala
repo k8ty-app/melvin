@@ -39,16 +39,21 @@ object ArtifactService {
         }
     }
     case req @ PUT -> "artifacts" /: artifact =>
-      workerAuthenticated(req) {
-        req.decodeWith(byteArrayDecoder, strict = true) { data =>
-          S3StorageProvider.resource
-            .use { implicit client =>
-              S3StorageProvider.storeObject(s"artifacts/$artifact", data)
-            }
-            .flatMap {
-              case Right(etag) => Ok(etag)
-              case Left(err)   => InternalServerError(err)
-            }
+      workerAuthenticated(req) { worker =>
+        val orgPath = Path(worker.organization.replaceAll("\\.", "/"))
+        if (artifact.startsWith(orgPath)) {
+          req.decodeWith(byteArrayDecoder, strict = true) { data =>
+            S3StorageProvider.resource
+              .use { implicit client =>
+                S3StorageProvider.storeObject(s"artifacts/$artifact", data)
+              }
+              .flatMap {
+                case Right(etag) => Ok(etag)
+                case Left(err)   => InternalServerError(err)
+              }
+          }
+        } else {
+          Forbidden("Worker is not a member of this organization")
         }
       }
   }
