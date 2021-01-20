@@ -2,7 +2,6 @@ package app.k8ty.models
 
 import app.k8ty.melvin.doobie.io.{ Organization, Worker }
 import io.getquill.{ idiom => _ }
-import org.http4s.BasicCredentials
 import org.scalatest.BeforeAndAfter
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -54,30 +53,30 @@ class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with Befo
 
   it should "properly verify Correct BasicCredentials" in {
     assert(
-      Worker.verifyBasicCredentials(workerId, originalSecret).unsafeRunSync()
+      Worker.verifyBasicCredentials(workerId, originalSecret).unsafeRunSync().isDefined
     )
   }
 
   it should "properly verify Bad User BasicCredentials" in {
     assert(
-      !Worker.verifyBasicCredentials("No Good", originalSecret).unsafeRunSync()
+      Worker.verifyBasicCredentials("No Good", originalSecret).unsafeRunSync().isEmpty
     )
   }
 
   it should "properly verify Bad Password BasicCredentials" in {
     assert(
-      !Worker.verifyBasicCredentials(workerId, "No Good").unsafeRunSync()
+      Worker.verifyBasicCredentials(workerId, "No Good").unsafeRunSync().isEmpty
     )
   }
 
   it should "properly verify Bad User + Pass BasicCredentials" in {
     assert(
-      !Worker.verifyBasicCredentials("No good", "No Good").unsafeRunSync()
+      Worker.verifyBasicCredentials("No good", "No Good").unsafeRunSync().isEmpty
     )
   }
 
   lazy val newWorkerSecret: Option[String] = Worker.reRollWorkerSecret(workerId).unsafeRunSync()
-  lazy val nwSecret: String                = newWorkerSecret.getOrElse(throw new Exception("No updated Worker Secret"))
+  lazy val newSecret: String                = newWorkerSecret.getOrElse(throw new Exception("No updated Worker Secret"))
 
   it should "be able to re-roll a Worker secret" in {
     assert(newWorkerSecret.nonEmpty)
@@ -86,10 +85,10 @@ class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with Befo
 
   it should "properly verify our updated BasicCredentials" in {
     assert(
-      !Worker.verifyBasicCredentials(workerId, originalSecret).unsafeRunSync()
+      Worker.verifyBasicCredentials(workerId, originalSecret).unsafeRunSync().isEmpty
     )
     assert(
-      Worker.verifyBasicCredentials(workerId, nwSecret).unsafeRunSync()
+      Worker.verifyBasicCredentials(workerId, newSecret).unsafeRunSync().isDefined
     )
   }
 
@@ -104,7 +103,7 @@ class WorkerIOIntegrationSpec extends AnyFlatSpec with should.Matchers with Befo
       Worker.deactivateWorker(workerId).unsafeRunSync() == 1
     )
     assert(
-      !Worker.verifyBasicCredentials(workerId, nwSecret).unsafeRunSync()
+      Worker.verifyBasicCredentials(workerId, newSecret).unsafeRunSync().isEmpty
     )
   }
 
