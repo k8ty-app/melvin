@@ -12,7 +12,9 @@ case class ArtifactRef(
   packageId: String,
   version: String,
   fileName: String
-)
+) {
+  val href: String = s"/artifacts/${orgId.replaceAll("\\.","/")}/$packageId/$version/$fileName"
+}
 
 object ArtifactRef extends ArtifactRefIO {
   val dc = new DoobieContext.Postgres(SnakeCase)

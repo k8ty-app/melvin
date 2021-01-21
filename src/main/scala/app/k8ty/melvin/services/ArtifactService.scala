@@ -8,6 +8,7 @@ import org.http4s.EntityDecoder.byteArrayDecoder
 import org.http4s.dsl.io._
 import org.http4s.{HttpRoutes, Request, Response, StaticFile}
 import pureconfig.generic.auto._
+import org.http4s.twirl._
 
 import java.net.URL
 
@@ -38,6 +39,13 @@ object ArtifactService {
   }
 
   val serviceRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
+
+    case GET -> Root / "artifacts" => {
+      ArtifactRef.getArtifactRefs.flatMap { results =>
+        Ok(html.artifacts(results.groupBy(_.orgId)))
+      }
+    }
+
     case req @ GET -> "artifacts" /: artifact                                          => {
       S3StorageProvider.resource
         .use { implicit client =>
