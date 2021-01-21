@@ -3,10 +3,10 @@ package app.k8ty.melvin.services
 import app.k8ty.melvin.doobie.io.ArtifactRef
 import app.k8ty.melvin.middleware.ServerAuth.workerAuthenticated
 import app.k8ty.melvin.storage.S3StorageProvider
-import cats.effect.{ Blocker, ContextShift, IO, Timer }
+import cats.effect.{Blocker, ContextShift, IO, Timer}
 import org.http4s.EntityDecoder.byteArrayDecoder
 import org.http4s.dsl.io._
-import org.http4s.{ HttpRoutes, Request, Response, StaticFile }
+import org.http4s.{HttpRoutes, Request, Response, StaticFile}
 import pureconfig.generic.auto._
 
 import java.net.URL
