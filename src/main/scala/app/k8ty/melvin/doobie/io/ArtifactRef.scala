@@ -5,13 +5,13 @@ import app.k8ty.melvin.doobie.actions.ArtifactRefIO
 import cats.effect.IO
 import doobie.implicits._
 import doobie.quill.DoobieContext
-import io.getquill.{SnakeCase, idiom => _}
+import io.getquill.{ SnakeCase, idiom => _ }
 
 case class ArtifactRef(
   orgId: String,
   packageId: String,
   version: String,
-  filename: String
+  fileName: String
 )
 
 object ArtifactRef extends ArtifactRefIO {
@@ -22,7 +22,7 @@ object ArtifactRef extends ArtifactRefIO {
 
     def insert(artifactRef: ArtifactRef) = quote {
       query[ArtifactRef]
-        .insert(artifactRef)
+        .insert(lift(artifactRef))
     }
 
     val get = quote {
