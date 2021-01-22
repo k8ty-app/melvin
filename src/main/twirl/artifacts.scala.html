@@ -1,5 +1,5 @@
-@import app.k8ty.melvin.models.ArtifactSummary
-@(summary: Seq[ArtifactSummary])
+@import app.k8ty.melvin.models.ArtifactListing
+@(listings: Seq[ArtifactListing])
 
 @html.main("Artifacts") {
 
@@ -13,7 +13,7 @@
                 <th>Import</th>
                 <th>Files</th>
             </thead>
-            @for(elem <- summary) {
+            @for(elem <- listings) {
                 <tr>
                     <td>@elem.orgId</td>
                     <td>@elem.packageId</td>

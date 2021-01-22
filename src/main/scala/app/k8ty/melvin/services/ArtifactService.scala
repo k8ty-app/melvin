@@ -2,14 +2,12 @@ package app.k8ty.melvin.services
 
 import app.k8ty.melvin.doobie.io.ArtifactRef
 import app.k8ty.melvin.middleware.ServerAuth.workerAuthenticated
-import app.k8ty.melvin.models.ArtifactSummary
 import app.k8ty.melvin.storage.S3StorageProvider
-import cats.effect.{ Blocker, ContextShift, IO, Timer }
+import cats.effect.{Blocker, ContextShift, IO}
 import org.http4s.EntityDecoder.byteArrayDecoder
 import org.http4s.dsl.io._
-import org.http4s.{ HttpRoutes, Request, Response, StaticFile }
+import org.http4s.{HttpRoutes, Request, Response, StaticFile}
 import pureconfig.generic.auto._
-import org.http4s.twirl._
 
 import java.net.URL
 
@@ -17,9 +15,6 @@ object ArtifactService {
 
   implicit val ioContextShift: ContextShift[IO] =
     IO.contextShift(scala.concurrent.ExecutionContext.Implicits.global)
-
-  implicit val ioTimer: Timer[IO] =
-    IO.timer(scala.concurrent.ExecutionContext.Implicits.global)
 
   val blocker: Blocker =
     Blocker.liftExecutionContext(
@@ -40,32 +35,6 @@ object ArtifactService {
   }
 
   val serviceRoutes: HttpRoutes[IO] = HttpRoutes.of[IO] {
-
-    case GET -> Root / "artifacts" => {
-      ArtifactRef.getArtifactRefs.flatMap { results =>
-        Ok(
-          html.artifacts(
-            results
-              .map(a => ArtifactSummary(a.orgId, a.packageId, a.version))
-              .distinct
-          )
-        )
-      }
-    }
-
-    case GET -> Root / "artifacts" / tld / org / pkg / version => {
-      val orgId = Seq(tld, org).mkString(".")
-      ArtifactRef.getFileList(orgId, pkg, version).flatMap { results =>
-        Ok(html.artifact(s""""$orgId" %% "${pkg.split("_")(0)}" % "$version"""", results))
-      }
-    }
-
-    case GET -> Root / "artifacts" / tld / org / sub / pkg / version => {
-      val orgId = Seq(tld, org, sub).mkString(".")
-      ArtifactRef.getFileList(orgId, pkg, version).flatMap { results =>
-        Ok(html.artifact(s""""$orgId" %% "${pkg.split("_")(0)}" % "$version"""", results))
-      }
-    }
 
     case req @ GET -> "artifacts" /: artifact                                          => {
       S3StorageProvider.resource
