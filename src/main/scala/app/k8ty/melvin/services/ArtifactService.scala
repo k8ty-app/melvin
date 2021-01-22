@@ -2,11 +2,12 @@ package app.k8ty.melvin.services
 
 import app.k8ty.melvin.doobie.io.ArtifactRef
 import app.k8ty.melvin.middleware.ServerAuth.workerAuthenticated
+import app.k8ty.melvin.models.ArtifactSummary
 import app.k8ty.melvin.storage.S3StorageProvider
-import cats.effect.{Blocker, ContextShift, IO, Timer}
+import cats.effect.{ Blocker, ContextShift, IO, Timer }
 import org.http4s.EntityDecoder.byteArrayDecoder
 import org.http4s.dsl.io._
-import org.http4s.{HttpRoutes, Request, Response, StaticFile}
+import org.http4s.{ HttpRoutes, Request, Response, StaticFile }
 import pureconfig.generic.auto._
 import org.http4s.twirl._
 
@@ -42,7 +43,27 @@ object ArtifactService {
 
     case GET -> Root / "artifacts" => {
       ArtifactRef.getArtifactRefs.flatMap { results =>
-        Ok(html.artifacts(results.groupBy(_.orgId)))
+        Ok(
+          html.artifacts(
+            results
+              .map(a => ArtifactSummary(a.orgId, a.packageId, a.version))
+              .distinct
+          )
+        )
+      }
+    }
+
+    case GET -> Root / "artifacts" / tld / org / pkg / version => {
+      val orgId = Seq(tld, org).mkString(".")
+      ArtifactRef.getFileList(orgId, pkg, version).flatMap { results =>
+        Ok(html.artifact(s""""$orgId" %% "${pkg.split("_")(0)}" % "$version"""", results))
+      }
+    }
+
+    case GET -> Root / "artifacts" / tld / org / sub / pkg / version => {
+      val orgId = Seq(tld, org, sub).mkString(".")
+      ArtifactRef.getFileList(orgId, pkg, version).flatMap { results =>
+        Ok(html.artifact(s""""$orgId" %% "${pkg.split("_")(0)}" % "$version"""", results))
       }
     }
 

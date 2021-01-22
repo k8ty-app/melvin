@@ -6,4 +6,5 @@ import cats.effect.IO
 trait ArtifactRefIO {
   def insertArtifactRef(ref: ArtifactRef): IO[Long]
   def getArtifactRefs: IO[Seq[ArtifactRef]]
+  def getFileList(orgId: String, packageId: String, version: String): IO[Seq[ArtifactRef]]
 }

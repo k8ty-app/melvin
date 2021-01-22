@@ -1,0 +1,29 @@
+@import app.k8ty.melvin.doobie.io.ArtifactRef
+@(title: String, artifactFiles: Seq[ArtifactRef])
+
+@html.main("Artifacts") {
+
+    <div class="container">
+        <h1 class="title">@{
+            title
+        }</h1>
+        <table class="table is-hoverable is-fullwidth is-striped">
+            <thead>
+                <th>File</th>
+                <th>Link</th>
+            </thead>
+            @for(elem <- artifactFiles) {
+                <tr>
+                    <td>@elem.fileName</td>
+                    <td>
+                        <a href="@{
+                            elem.href
+                        }">
+                Link
+                        </a>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+}

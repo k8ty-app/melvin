@@ -29,6 +29,15 @@ object ArtifactRef extends ArtifactRefIO {
 
     val get = quote {
       query[ArtifactRef]
+        .sortBy(a => (a.orgId, a.version, a.packageId))
+    }
+
+    def files(orgId: String, packageId: String, version: String) = quote {
+      query[ArtifactRef]
+        .filter(_.orgId == lift(orgId))
+        .filter(_.packageId == lift(packageId))
+        .filter(_.version == lift(version))
+        .sortBy(_.fileName)
     }
 
   }
@@ -38,5 +47,9 @@ object ArtifactRef extends ArtifactRefIO {
 
   override def getArtifactRefs: IO[Seq[ArtifactRef]] =
     run(Queries.get).transact(DoobieTransactor.xa)
+
+  override def getFileList(orgId: String, packageId: String, version: String): IO[Seq[ArtifactRef]] = {
+    run(Queries.files(orgId, packageId, version)).transact(DoobieTransactor.xa)
+  }
 
 }

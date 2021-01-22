@@ -1,33 +1,29 @@
-@import app.k8ty.melvin.doobie.io.ArtifactRef
-@(orgMap: Map[String, Seq[ArtifactRef]])
+@import app.k8ty.melvin.models.ArtifactSummary
+@(summary: Seq[ArtifactSummary])
 
 @html.main("Artifacts") {
 
-  @for(org <- orgMap) {
     <div class="container">
-      <h1 class="title">@{org._1}</h1>
-      <table class="table is-hoverable is-fullwidth is-striped">
-        <thead>
-          <th>OrgId</th>
-          <th>PackageId</th>
-          <th>Version</th>
-          <th>File</th>
-          <th>Link</th>
-        </thead>
-        @for(elem <- org._2) {
-          <tr>
-            <td>@elem.orgId</td>
-            <td>@elem.packageId</td>
-            <td>@elem.version</td>
-            <td>@elem.fileName</td>
-            <td>
-              <a href="@{elem.href}">
-                Link
-              </a>
-            </td>
-          </tr>
-        }
-      </table>
+        <h1 class="title">Artifacts</h1>
+        <table class="table is-hoverable is-fullwidth is-striped">
+            <thead>
+                <th>OrgId</th>
+                <th>PackageId</th>
+                <th>Version</th>
+                <th>Import</th>
+                <th>Files</th>
+            </thead>
+            @for(elem <- summary) {
+                <tr>
+                    <td>@elem.orgId</td>
+                    <td>@elem.packageId</td>
+                    <td>@elem.version</td>
+                  <td>"@elem.orgId" %% "@elem.packageId.split("_")(0)" % "@elem.version"</td>
+                    <td>
+                      <a href="@elem.href">Files</a>
+                    </td>
+                </tr>
+            }
+        </table>
     </div>
-  }
 }
